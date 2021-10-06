@@ -4,6 +4,7 @@ from .devicetool import destroy_block_device_head_and_tail
 from .devicetool import destroy_block_devices_head_and_tail
 from .devicetool import device_is_not_a_partition
 from .devicetool import get_block_device_size
+from .devicetool import get_partuuid_for_partition
 from .devicetool import path_is_block_special
 from .devicetool import safety_check_devices
 from .devicetool import write_efi_partition
