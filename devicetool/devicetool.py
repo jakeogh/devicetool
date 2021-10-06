@@ -171,7 +171,7 @@ def cli(ctx,
 
 
 @cli.command()
-@click.argument('device', required=True, nargs=1)
+@click.argument('device', required=True, nargs=1, type=click.Path(exists=True, path_type=Path))
 @click.option('--start', is_flag=False, required=True, type=int)
 @click.option('--end', is_flag=False, required=True, type=int)
 @click.option('--note', is_flag=False, type=str)
@@ -212,7 +212,7 @@ def backup_byte_range(*,
 
 
 @cli.command()
-@click.option('--device', is_flag=False, required=True)
+@click.option('--device', is_flag=False, required=True, type=click.Path(exists=True, path_type=Path))
 @click.option('--backup-file', is_flag=False, required=True)
 @click.option('--start', is_flag=False, type=int)
 @click.option('--end', is_flag=False, type=int)
@@ -246,7 +246,7 @@ def compare_byte_range(*,
 
 
 @cli.command()
-@click.option('--device', is_flag=False, required=True)
+@click.option('--device', is_flag=False, required=True, type=click.Path(exists=True, path_type=Path))
 @click.option('--force', is_flag=True, required=False)
 @click.option('--no-wipe', is_flag=True, required=False)
 @click.option('--no-backup', is_flag=True, required=False)
@@ -288,7 +288,7 @@ def write_gpt(ctx, *,
 
 
 @cli.command()
-@click.option('--device', is_flag=False, required=True)
+@click.option('--device', is_flag=False, required=True, type=click.Path(exists=True, path_type=Path))
 @click.option('--force', is_flag=True, required=False)
 @click.option('--no-wipe', is_flag=True, required=False)
 @click.option('--no-backup', is_flag=True, required=False)
@@ -326,7 +326,7 @@ def write_mbr(ctx, *,
 
 
 @cli.command()
-@click.option('--device', is_flag=False, required=True)
+@click.option('--device', is_flag=False, required=True, type=click.Path(exists=True, path_type=Path))
 @click.option('--start', is_flag=False, required=True, type=str)
 @click.option('--end', is_flag=False, required=True, type=str)
 @click.option('--partition-number', is_flag=False, required=True, type=str)
@@ -371,7 +371,7 @@ def write_efi_partition(ctx, *,
 
 
 @cli.command()
-@click.option('--device', is_flag=False, required=True)
+@click.option('--device', is_flag=False, required=True, type=click.Path(exists=True, path_type=Path))
 @click.option('--start', is_flag=False, required=True, type=str)
 @click.option('--end', is_flag=False, required=True, type=str)
 @click.option('--partition_number', is_flag=False, required=True, type=str)
@@ -421,7 +421,7 @@ def write_grub_bios_partition(*,
 
 
 @cli.command()
-@click.argument('device', required=True, nargs=1, type=str)
+@click.argument('device', required=True, nargs=1, type=click.Path(exists=True, path_type=Path))
 @click.option('--filesystem', "filesystem", is_flag=False, required=True, type=click.Choice(['fat16', 'fat32', 'ext4']))
 @click.option('--force', is_flag=True, required=False)
 @click.option('--raw-device', is_flag=True, required=False)
@@ -460,7 +460,7 @@ def create_filesystem(*,
 
 
 @cli.command()
-@click.argument('device', nargs=1,)
+@click.argument('device', nargs=1, type=click.Path(exists=True, path_type=Path))
 @click.option('--force', is_flag=True,)
 @click.option('--ask', is_flag=True,)
 @click.option('--verbose', is_flag=True,)
@@ -573,7 +573,7 @@ def destroy_block_device_head(ctx, *,
 
 
 @cli.command()
-@click.argument('device', required=True, nargs=1, type=str)
+@click.argument('device', required=True, nargs=1, type=click.Path(exists=True, path_type=Path))
 @click.option('--size', is_flag=False, required=True, type=int)
 @click.option('--source', is_flag=False, required=True, type=click.Choice(['urandom', 'zero']))
 @click.option('--ask', is_flag=True, required=False)
@@ -612,7 +612,7 @@ def destroy_block_device_tail(ctx, *,
 
 
 @cli.command()
-@click.argument('device', required=True, nargs=1, type=str,)
+@click.argument('device', required=True, nargs=1, type=click.Path(exists=True, path_type=Path),)
 @click.option('--start', is_flag=False, required=True, type=int,)
 @click.option('--end', is_flag=False, required=True, type=int,)
 @click.option('--source', is_flag=False, required=True, type=click.Choice(['urandom', 'zero']),)
@@ -659,7 +659,7 @@ def destroy_byte_range(ctx, *,
 
 
 @cli.command()
-@click.argument('device', required=True, nargs=1)
+@click.argument('device', required=True, nargs=1, type=click.Path(exists=True, path_type=Path))
 @click.option('--size', is_flag=False, type=int, default=(2048))
 @click.option('--source', is_flag=False, required=True, type=click.Choice(['urandom', 'zero']))
 @click.option('--note', is_flag=False, type=str)
@@ -715,8 +715,24 @@ def destroy_block_device_head_and_tail(ctx, *,
                debug=debug,)
 
 
+def get_partuuid_for_partition(partition: Path,
+                               verbose: bool,
+                               debug: bool,
+                               ):
+
+    blkid_command = sh.blkid(partition)
+    if verbose:
+        ic(blkid_command)
+
+    partuuid = blkid_command.split('PARTUUID=')[-1:][0].split('"')
+    if verbose:
+        ic(partuuid)
+
+    return partuuid
+
+
 @cli.command()
-@click.argument('devices', required=True, nargs=-1)
+@click.argument('devices', required=True, nargs=-1, type=click.Path(exists=True, path_type=Path))
 @click.option('--size', is_flag=False, type=int, default=(1024 * 1024 * 128))
 @click.option('--note', is_flag=False, type=str)
 @click.option('--force', is_flag=True, required=False)
@@ -759,4 +775,20 @@ def destroy_block_devices_head_and_tail(ctx, *,
                    no_backup=no_backup,
                    verbose=verbose,
                    debug=debug,)
+
+@cli.command('partuuid')
+@click.argument('partition', required=True, nargs=1, type=click.path(exists=True, path_type=Path))
+@click.option('--verbose', is_flag=True, required=False)
+@click.option('--debug', is_flag=True, required=False)
+@click.pass_context
+def partuuid(ctx,
+             *,
+             partition: Path,
+             verbose: bool,
+             debug: bool,
+             ):
+    partuuid = get_partuuid_for_partition(partition=partition,
+                                          verbose=verbose,
+                                          debug=debug,)
+    print(partuuid)
 
