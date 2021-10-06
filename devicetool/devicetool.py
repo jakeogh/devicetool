@@ -777,7 +777,7 @@ def destroy_block_devices_head_and_tail(ctx, *,
                    debug=debug,)
 
 @cli.command('partuuid')
-@click.argument('partition', required=True, nargs=1, type=click.path(exists=True, path_type=Path))
+@click.argument('partition', required=True, nargs=1, type=click.Path(exists=True, path_type=Path))
 @click.option('--verbose', is_flag=True, required=False)
 @click.option('--debug', is_flag=True, required=False)
 @click.pass_context
