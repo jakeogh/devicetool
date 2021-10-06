@@ -724,7 +724,7 @@ def get_partuuid_for_partition(partition: Path,
     if verbose:
         ic(blkid_command)
 
-    partuuid = blkid_command.split('PARTUUID=')[-1:][0].split('"')
+    partuuid = blkid_command.split('PARTUUID=')[-1:][0].split('"')[1]
     if verbose:
         ic(partuuid)
 
