@@ -787,6 +787,7 @@ def partuuid(ctx,
              verbose: bool,
              debug: bool,
              ):
+
     partuuid = get_partuuid_for_partition(partition=partition,
                                           verbose=verbose,
                                           debug=debug,)
