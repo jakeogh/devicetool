@@ -160,7 +160,7 @@ def add_partition_number_to_device(*,
 @click.option('--verbose', is_flag=True)
 @click.option('--debug', is_flag=True)
 @click.pass_context
-def blocktool(ctx,
+def cli(ctx,
               verbose: bool,
               debug: bool,
               ):
@@ -170,7 +170,7 @@ def blocktool(ctx,
     ctx.obj['debug'] = debug
 
 
-@blocktool.command()
+@cli.command()
 @click.argument('device', required=True, nargs=1)
 @click.option('--start', is_flag=False, required=True, type=int)
 @click.option('--end', is_flag=False, required=True, type=int)
@@ -211,7 +211,7 @@ def backup_byte_range(*,
     print(backup_file)
 
 
-@blocktool.command()
+@cli.command()
 @click.option('--device', is_flag=False, required=True)
 @click.option('--backup-file', is_flag=False, required=True)
 @click.option('--start', is_flag=False, type=int)
@@ -245,7 +245,7 @@ def compare_byte_range(*,
     os.system(vbindiff_command)
 
 
-@blocktool.command()
+@cli.command()
 @click.option('--device', is_flag=False, required=True)
 @click.option('--force', is_flag=True, required=False)
 @click.option('--no-wipe', is_flag=True, required=False)
@@ -287,7 +287,7 @@ def write_gpt(ctx, *,
     #run_command("sgdisk --clear " + device) #alt way to greate gpt label
 
 
-@blocktool.command()
+@cli.command()
 @click.option('--device', is_flag=False, required=True)
 @click.option('--force', is_flag=True, required=False)
 @click.option('--no-wipe', is_flag=True, required=False)
@@ -325,7 +325,7 @@ def write_mbr(ctx, *,
     #run_command("sgdisk --clear " + device) #alt way to greate gpt label
 
 
-@blocktool.command()
+@cli.command()
 @click.option('--device', is_flag=False, required=True)
 @click.option('--start', is_flag=False, required=True, type=str)
 @click.option('--end', is_flag=False, required=True, type=str)
@@ -370,7 +370,7 @@ def write_efi_partition(ctx, *,
     # 127488 /mnt/sdb2/EFI/BOOT/BOOTX64.EFI
 
 
-@blocktool.command()
+@cli.command()
 @click.option('--device', is_flag=False, required=True)
 @click.option('--start', is_flag=False, required=True, type=str)
 @click.option('--end', is_flag=False, required=True, type=str)
@@ -420,7 +420,7 @@ def write_grub_bios_partition(*,
     # sgdisk -a1 -n2:48:2047 -t2:EF02 -c2:"BIOS boot partition " + device # numbers in 512B sectors
 
 
-@blocktool.command()
+@cli.command()
 @click.argument('device', required=True, nargs=1, type=str)
 @click.option('--filesystem', "filesystem", is_flag=False, required=True, type=click.Choice(['fat16', 'fat32', 'ext4']))
 @click.option('--force', is_flag=True, required=False)
@@ -459,7 +459,7 @@ def create_filesystem(*,
         assert False
 
 
-@blocktool.command()
+@cli.command()
 @click.argument('device', nargs=1,)
 @click.option('--force', is_flag=True,)
 @click.option('--ask', is_flag=True,)
@@ -536,7 +536,7 @@ def destroy_block_device(ctx, *,
     run_command(close_command, verbose=True, expected_exit_status=0, ask=ask)
 
 
-@blocktool.command()
+@cli.command()
 @click.argument('device', required=True, nargs=1, type=str)
 @click.option('--size', is_flag=False, required=True, type=int)
 @click.option('--source', is_flag=False, required=True, type=click.Choice(['urandom', 'zero']))
@@ -572,7 +572,7 @@ def destroy_block_device_head(ctx, *,
                debug=debug,)
 
 
-@blocktool.command()
+@cli.command()
 @click.argument('device', required=True, nargs=1, type=str)
 @click.option('--size', is_flag=False, required=True, type=int)
 @click.option('--source', is_flag=False, required=True, type=click.Choice(['urandom', 'zero']))
@@ -611,7 +611,7 @@ def destroy_block_device_tail(ctx, *,
                debug=debug,)
 
 
-@blocktool.command()
+@cli.command()
 @click.argument('device', required=True, nargs=1, type=str,)
 @click.option('--start', is_flag=False, required=True, type=int,)
 @click.option('--end', is_flag=False, required=True, type=int,)
@@ -658,7 +658,7 @@ def destroy_byte_range(ctx, *,
             dfh.write(urandom_bytes)
 
 
-@blocktool.command()
+@cli.command()
 @click.argument('device', required=True, nargs=1)
 @click.option('--size', is_flag=False, type=int, default=(2048))
 @click.option('--source', is_flag=False, required=True, type=click.Choice(['urandom', 'zero']))
@@ -715,7 +715,7 @@ def destroy_block_device_head_and_tail(ctx, *,
                debug=debug,)
 
 
-@blocktool.command()
+@cli.command()
 @click.argument('devices', required=True, nargs=-1)
 @click.option('--size', is_flag=False, type=int, default=(1024 * 1024 * 128))
 @click.option('--note', is_flag=False, type=str)
