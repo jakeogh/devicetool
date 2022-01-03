@@ -149,9 +149,9 @@ def add_partition_number_to_device(*,
                                    ):
     device = Path(device)
     if device.name.startswith('nvme') or device.name.startswith('mmcblk'):
-        devpath = device.as_posix() + 'p' + partition_number
+        devpath = device.as_posix() + 'p' + str(partition_number)
     else:
-        devpath = device.as_posix() + partition_number
+        devpath = device.as_posix() + str(partition_number)
     return Path(devpath)
 
 
@@ -558,7 +558,7 @@ def destroy_block_device(ctx,
 
     close_command = "cryptsetup close " + device.name
     ic(close_command)
-    run_command(close_command, verbose=True, expected_exit_status=0, ask=ask, verbose=verbose,)
+    run_command(close_command, expected_exit_status=0, ask=ask, verbose=True,)
 
 
 @cli.command()
