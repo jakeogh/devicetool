@@ -531,7 +531,7 @@ def destroy_block_device(ctx,
 
     luks_command = "cryptsetup open --type plain -d /dev/urandom " + device.as_posix() + " " + device.name
     ic(luks_command)
-    run_command(luks_command, verbose=True, expected_exit_status=0, ask=ask, verbose=verbose,)
+    run_command(luks_command, expected_exit_status=0, ask=ask, verbose=True,)
     #sh.cryptsetup('open', '--type', 'plain', '-d', '/dev/urandom', device.as_posix(), device.name)
 
     assert path_is_block_special(luks_mapper, follow_symlinks=True)
