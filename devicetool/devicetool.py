@@ -30,14 +30,15 @@ from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
+from typing import Union
 
 import click
 import sh
-from asserttool import eprint
 from asserttool import ic
-from asserttool import tv
 from clicktool import click_add_options
 from clicktool import click_global_options
+from clicktool import tv
+from eprint import eprint
 from mounttool import block_special_path_is_mounted
 from pathtool import path_exists
 from pathtool import path_is_block_special
@@ -51,7 +52,7 @@ def write_output(buf):
 
 
 def get_block_device_size(device: Path,
-                          verbose: int,
+                          verbose: Union[bool, int, float],
                           ):
     assert Path(device).is_block_device()
     fd = os.open(device, os.O_RDONLY)
@@ -63,7 +64,7 @@ def get_block_device_size(device: Path,
 
 def safety_check_devices(boot_device: Path,
                          root_devices: Tuple[Path, ...],
-                         verbose: int,
+                         verbose: Union[bool, int, float],
                          boot_device_partition_table: str,
                          boot_filesystem: str,
                          root_device_partition_table: str,
@@ -112,7 +113,7 @@ def safety_check_devices(boot_device: Path,
 
 def device_is_not_a_partition(*,
                               device: Path,
-                              verbose: int,
+                              verbose: Union[bool, int, float],
                               ):
     device = Path(device)
     if not (device.name.startswith('nvme') or device.name.startswith('mmcblk')):
@@ -145,7 +146,7 @@ def wait_for_block_special_device_to_exist(*,
 def add_partition_number_to_device(*,
                                    device: Path,
                                    partition_number: int,
-                                   verbose: int,
+                                   verbose: Union[bool, int, float],
                                    ):
     device = Path(device)
     if device.name.startswith('nvme') or device.name.startswith('mmcblk'):
@@ -156,7 +157,7 @@ def add_partition_number_to_device(*,
 
 
 def get_partuuid_for_partition(partition: Path,
-                               verbose: int,
+                               verbose: Union[bool, int, float],
                                ):
 
     blkid_command = sh.blkid(partition)
@@ -170,11 +171,11 @@ def get_partuuid_for_partition(partition: Path,
     return partuuid
 
 
-@click.group()
+@click.group(no_args_is_help=True)
 @click_add_options(click_global_options)
 @click.pass_context
 def cli(ctx,
-        verbose: int,
+        verbose: Union[bool, int, float],
         verbose_inf: bool,
         ):
     tty, verbose = tv(ctx=ctx,
@@ -196,7 +197,7 @@ def backup_byte_range(ctx,
                       start: int,
                       end: int,
                       note: str,
-                      verbose: int,
+                      verbose: Union[bool, int, float],
                       verbose_inf: bool,
                       ):
 
@@ -238,7 +239,7 @@ def compare_byte_range(ctx,
                        backup_file: str,
                        start: int,
                        end: int,
-                       verbose: int,
+                       verbose: Union[bool, int, float],
                        verbose_inf: bool,
                        ):
 
@@ -281,7 +282,7 @@ def write_gpt(ctx,
               force: bool,
               no_wipe: bool,
               no_backup: bool,
-              verbose: int,
+              verbose: Union[bool, int, float],
               verbose_inf: bool,
               ):
 
@@ -323,7 +324,7 @@ def write_mbr(ctx,
               force: bool,
               no_wipe: bool,
               no_backup: bool,
-              verbose: int,
+              verbose: Union[bool, int, float],
               verbose_inf: bool,
               ):
     device = Path(device)
@@ -363,7 +364,7 @@ def write_efi_partition(ctx,
                         end: int,
                         partition_number: str,
                         force: bool,
-                        verbose: int,
+                        verbose: Union[bool, int, float],
                         verbose_inf: bool,
                         ):
     device = Path(device)
@@ -408,7 +409,7 @@ def write_grub_bios_partition(ctx,
                               end: int,
                               force: int,
                               partition_number: str,
-                              verbose: int,
+                              verbose: Union[bool, int, float],
                               verbose_inf: bool,
                               ):
     device = Path(device)
@@ -457,7 +458,7 @@ def create_filesystem(ctx,
                       filesystem: str,
                       force: bool,
                       raw_device: bool,
-                      verbose: int,
+                      verbose: Union[bool, int, float],
                       verbose_inf: bool,
                       ):
 
@@ -495,7 +496,7 @@ def destroy_block_device(ctx,
                          device: Path,
                          force: bool,
                          ask: bool,
-                         verbose: int,
+                         verbose: Union[bool, int, float],
                          verbose_inf: bool,
                          ):
 
@@ -578,7 +579,7 @@ def destroy_block_device_head(ctx,
                               ask: bool,
                               no_backup: bool,
                               note: str,
-                              verbose: int,
+                              verbose: Union[bool, int, float],
                               verbose_inf: bool,
                               ):
     device = Path(device)
@@ -614,7 +615,7 @@ def destroy_block_device_tail(ctx,
                               no_backup: bool,
                               ask: bool,
                               note: str,
-                              verbose: int,
+                              verbose: Union[bool, int, float],
                               verbose_inf: bool,
                               ):
     device = Path(device)
@@ -655,7 +656,7 @@ def destroy_byte_range(ctx,
                        ask: bool,
                        no_backup: bool,
                        note: str,
-                       verbose: int,
+                       verbose: Union[bool, int, float],
                        verbose_inf: bool,
                        ):
     device = Path(device)
@@ -702,7 +703,7 @@ def destroy_block_device_head_and_tail(ctx,
                                        ask: bool,
                                        force: bool,
                                        no_backup: bool,
-                                       verbose: int,
+                                       verbose: Union[bool, int, float],
                                        verbose_inf: bool,
                                        ):
     #run_command("sgdisk --zap-all " + device, verbose=verbose,) #alt method
@@ -757,7 +758,7 @@ def destroy_block_devices_head_and_tail(ctx,
                                         ask: bool,
                                         force: bool,
                                         no_backup: bool,
-                                        verbose: int,
+                                        verbose: Union[bool, int, float],
                                         verbose_inf: bool,
                                         ):
 
@@ -792,7 +793,7 @@ def destroy_block_devices_head_and_tail(ctx,
 def partuuid(ctx,
              *,
              partition: Path,
-             verbose: int,
+             verbose: Union[bool, int, float],
              verbose_inf: bool,
              ):
 
