@@ -264,6 +264,7 @@ def backup_byte_range(
     note: str,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
 
     device = Path(device)
@@ -320,6 +321,7 @@ def compare_byte_range(
     end: int,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
 
     device = Path(device)
@@ -369,6 +371,7 @@ def write_gpt(
     no_backup: bool,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
 
     device = Path(device)
@@ -428,6 +431,7 @@ def write_mbr(
     no_backup: bool,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
     device = Path(device)
     eprint("writing MBR to:", device)
@@ -486,6 +490,7 @@ def write_efi_partition(
     force: bool,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
     device = Path(device)
     ic("creating efi partition on:", device, partition_number, start, end)
@@ -574,6 +579,7 @@ def write_grub_bios_partition(
     partition_number: str,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
     device = Path(device)
     ic("creating grub_bios partition on:", device, partition_number, start, end)
@@ -668,6 +674,7 @@ def create_filesystem(
     raw_device: bool,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
 
     device = Path(device)
@@ -728,6 +735,7 @@ def destroy_block_device(
     ask: bool,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
 
     device = Path(device)
@@ -843,6 +851,7 @@ def destroy_block_device_head(
     note: str,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
     device = Path(device)
     assert path_is_block_special(device)
@@ -888,6 +897,7 @@ def destroy_block_device_tail(
     note: str,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
     device = Path(device)
     assert size > 0
@@ -964,6 +974,7 @@ def destroy_byte_range(
     note: str,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
     device = Path(device)
     assert start >= 0
@@ -1017,6 +1028,7 @@ def destroy_block_device_head_and_tail(
     no_backup: bool,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
     # run_command("sgdisk --zap-all " + device, verbose=verbose,) #alt method
     device = Path(device)
@@ -1084,6 +1096,7 @@ def destroy_block_devices_head_and_tail(
     no_backup: bool,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
 
     assert isinstance(devices, list) or isinstance(devices, tuple)
@@ -1131,6 +1144,7 @@ def partuuid(
     partition: Path,
     verbose: Union[bool, int, float],
     verbose_inf: bool,
+    dict_input: bool,
 ):
 
     partuuid = get_partuuid_for_partition(
