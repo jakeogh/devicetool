@@ -1,40 +1,35 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
-# pylint: disable=C0111  # docstrings are always outdated and wrong
-# pylint: disable=W0511  # todo is encouraged
-# pylint: disable=C0301  # line too long
-# pylint: disable=R0902  # too many instance attributes
-# pylint: disable=C0302  # too many lines in module
-# pylint: disable=C0103  # single letter var names, func name too descriptive
-# pylint: disable=R0911  # too many return statements
-# pylint: disable=R0912  # too many branches
-# pylint: disable=R0915  # too many statements
-# pylint: disable=R0913  # too many arguments
-# pylint: disable=R1702  # too many nested blocks
-# pylint: disable=R0914  # too many local variables
-# pylint: disable=R0903  # too few public methods
-# pylint: disable=E1101  # no member for base
-# pylint: disable=W0201  # attribute defined outside __init__
-# pylint: disable=R0916  # Too many boolean expressions in if statement
-
+# pylint: disable=missing-docstring               # [C0111] docstrings are always outdated and wrong
+# pylint: disable=fixme                           # [W0511] todo is encouraged
+# pylint: disable=line-too-long                   # [C0301]
+# pylint: disable=too-many-instance-attributes    # [R0902]
+# pylint: disable=too-many-lines                  # [C0302] too many lines in module
+# pylint: disable=invalid-name                    # [C0103] single letter var names, name too descriptive
+# pylint: disable=too-many-return-statements      # [R0911]
+# pylint: disable=too-many-branches               # [R0912]
+# pylint: disable=too-many-statements             # [R0915]
+# pylint: disable=too-many-arguments              # [R0913]
+# pylint: disable=too-many-nested-blocks          # [R1702]
+# pylint: disable=too-many-locals                 # [R0914]
+# pylint: disable=too-few-public-methods          # [R0903]
+# pylint: disable=no-member                       # [E1101] no member for base
+# pylint: disable=attribute-defined-outside-init  # [W0201]
+# pylint: disable=too-many-boolean-expressions    # [R0916] in if statement
+from __future__ import annotations
 
 import os
 import sys
 import time
+from collections.abc import Sequence
 from pathlib import Path
-from typing import ByteString
-from typing import Generator
-from typing import Iterable
-from typing import List
-from typing import Optional
-from typing import Sequence
 from typing import Tuple
-from typing import Union
 
 import click
 import sh
 from asserttool import ic
+from click_auto_help import AHGroup
 from clicktool import click_add_options
 from clicktool import click_global_options
 from clicktool import tv
@@ -53,7 +48,7 @@ def write_output(buf):
 
 def get_block_device_size(
     device: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
     assert Path(device).is_block_device()
     fd = os.open(device, os.O_RDONLY)
@@ -66,7 +61,7 @@ def get_block_device_size(
 def safety_check_devices(
     boot_device: Path,
     root_devices: Tuple[Path, ...],
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     boot_device_partition_table: str,
     boot_filesystem: str,
     root_device_partition_table: str,
@@ -168,7 +163,7 @@ def safety_check_devices(
 def device_is_not_a_partition(
     *,
     device: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
     device = Path(device)
     if not (device.name.startswith("nvme") or device.name.startswith("mmcblk")):
@@ -205,7 +200,7 @@ def add_partition_number_to_device(
     *,
     device: Path,
     partition_number: int,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
     device = Path(device)
     if device.name.startswith("nvme") or device.name.startswith("mmcblk"):
@@ -217,7 +212,7 @@ def add_partition_number_to_device(
 
 def get_partuuid_for_partition(
     partition: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
 
     blkid_command = sh.blkid(partition)
@@ -231,13 +226,14 @@ def get_partuuid_for_partition(
     return partuuid
 
 
-@click.group(no_args_is_help=True)
+@click.group(no_args_is_help=True, cls=AHGroup)
 @click_add_options(click_global_options)
 @click.pass_context
 def cli(
     ctx,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
+    dict_output: bool,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -262,9 +258,9 @@ def backup_byte_range(
     start: int,
     end: int,
     note: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     device = Path(device)
@@ -319,9 +315,9 @@ def compare_byte_range(
     backup_file: str,
     start: int,
     end: int,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     device = Path(device)
@@ -369,9 +365,9 @@ def write_gpt(
     force: bool,
     no_wipe: bool,
     no_backup: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     device = Path(device)
@@ -429,9 +425,9 @@ def write_mbr(
     force: bool,
     no_wipe: bool,
     no_backup: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     device = Path(device)
     eprint("writing MBR to:", device)
@@ -488,9 +484,9 @@ def write_efi_partition(
     end: int,
     partition_number: str,
     force: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     device = Path(device)
     ic("creating efi partition on:", device, partition_number, start, end)
@@ -577,9 +573,9 @@ def write_grub_bios_partition(
     end: int,
     force: int,
     partition_number: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     device = Path(device)
     ic("creating grub_bios partition on:", device, partition_number, start, end)
@@ -672,9 +668,9 @@ def create_filesystem(
     filesystem: str,
     force: bool,
     raw_device: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     device = Path(device)
@@ -733,9 +729,9 @@ def destroy_block_device(
     device: Path,
     force: bool,
     ask: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     device = Path(device)
@@ -849,9 +845,9 @@ def destroy_block_device_head(
     ask: bool,
     no_backup: bool,
     note: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     device = Path(device)
     assert path_is_block_special(device)
@@ -895,9 +891,9 @@ def destroy_block_device_tail(
     no_backup: bool,
     ask: bool,
     note: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     device = Path(device)
     assert size > 0
@@ -972,9 +968,9 @@ def destroy_byte_range(
     ask: bool,
     no_backup: bool,
     note: str,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     device = Path(device)
     assert start >= 0
@@ -1026,9 +1022,9 @@ def destroy_block_device_head_and_tail(
     ask: bool,
     force: bool,
     no_backup: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
     # run_command("sgdisk --zap-all " + device, verbose=verbose,) #alt method
     device = Path(device)
@@ -1094,9 +1090,9 @@ def destroy_block_devices_head_and_tail(
     ask: bool,
     force: bool,
     no_backup: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     assert isinstance(devices, list) or isinstance(devices, tuple)
@@ -1142,9 +1138,9 @@ def partuuid(
     ctx,
     *,
     partition: Path,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
-    dict_input: bool,
+    dict_output: bool,
 ):
 
     partuuid = get_partuuid_for_partition(
