@@ -22,7 +22,6 @@ from __future__ import annotations
 import os
 import sys
 import time
-from collections.abc import Sequence
 from pathlib import Path
 from typing import Tuple
 
@@ -472,7 +471,7 @@ def write_mbr(
 )
 @click.option("--start", is_flag=False, required=True, type=str)
 @click.option("--end", is_flag=False, required=True, type=str)
-@click.option("--partition-number", is_flag=False, required=True, type=str)
+@click.option("--partition-number", is_flag=False, required=True, type=int)
 @click.option("--force", is_flag=True, required=False)
 @click_add_options(click_global_options)
 @click.pass_context
@@ -482,7 +481,7 @@ def write_efi_partition(
     device: Path,
     start: int,
     end: int,
-    partition_number: str,
+    partition_number: int,
     force: bool,
     verbose: bool | int | float,
     verbose_inf: bool,
@@ -522,7 +521,7 @@ def write_efi_partition(
         "parted "
         + device.as_posix()
         + " --script -- name "
-        + partition_number
+        + str(partition_number)
         + " EFI",
         verbose=True,
     )
@@ -530,7 +529,7 @@ def write_efi_partition(
         "parted "
         + device.as_posix()
         + " --script -- set "
-        + partition_number
+        + str(partition_number)
         + " boot on",
         verbose=True,
     )
@@ -561,7 +560,7 @@ def write_efi_partition(
 )
 @click.option("--start", is_flag=False, required=True, type=str)
 @click.option("--end", is_flag=False, required=True, type=str)
-@click.option("--partition_number", is_flag=False, required=True, type=str)
+@click.option("--partition_number", is_flag=False, required=True, type=int)
 @click.option("--force", is_flag=True, required=False)
 @click_add_options(click_global_options)
 @click.pass_context
@@ -572,7 +571,7 @@ def write_grub_bios_partition(
     start: int,
     end: int,
     force: int,
-    partition_number: str,
+    partition_number: int,
     verbose: bool | int | float,
     verbose_inf: bool,
     dict_output: bool,
@@ -610,7 +609,7 @@ def write_grub_bios_partition(
         "parted "
         + device.as_posix()
         + " --script -- name "
-        + partition_number
+        + str(partition_number)
         + " BIOSGRUB",
         verbose=True,
     )
@@ -618,7 +617,7 @@ def write_grub_bios_partition(
         "parted "
         + device.as_posix()
         + " --script -- set "
-        + partition_number
+        + str(partition_number)
         + " bios_grub on",
         verbose=True,
     )
