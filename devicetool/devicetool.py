@@ -81,11 +81,7 @@ def safety_check_devices(
 
     if boot_device:
         eprint(
-            "installing gentoo on boot device: {boot_device} {boot_device_partition_table} {boot_filesystem}".format(
-                boot_device=boot_device,
-                boot_device_partition_table=boot_device_partition_table,
-                boot_filesystem=boot_filesystem,
-            )
+            f"installing gentoo on boot device: {boot_device} {boot_device_partition_table} {boot_filesystem}"
         )
         assert path_is_block_special(boot_device)
         assert not block_special_path_is_mounted(
@@ -178,7 +174,7 @@ def wait_for_block_special_device_to_exist(
     timeout: int = 5,
 ):
     device = Path(device)
-    eprint("waiting for block special device: {} to exist".format(device.as_posix()))
+    eprint(f"waiting for block special device: {device.as_posix()} to exist")
     start = time.time()
     if path_exists(device):
         assert path_is_block_special(device)
@@ -188,7 +184,7 @@ def wait_for_block_special_device_to_exist(
         time.sleep(0.1)
         if time.time() - start > timeout:
             raise TimeoutError(
-                "timeout waiting for block special device: {} to exist".format(device)
+                f"timeout waiting for block special device: {device} to exist"
             )
         if path_is_block_special(device):
             break
@@ -213,16 +209,16 @@ def get_partuuid_for_partition(
     partition: Path,
     verbose: bool | int | float = False,
 ):
-
-    blkid_command = sh.blkid(partition)
+    assert isinstance(partition, Path)
+    blkid_command = sh.blkid(partition.as_posix())
     if verbose:
         ic(blkid_command)
 
-    partuuid = blkid_command.split("PARTUUID=")[-1:][0].split('"')[1]
+    _partuuid = blkid_command.split("PARTUUID=")[-1:][0].split('"')[1]
     if verbose:
-        ic(partuuid)
+        ic(_partuuid)
 
-    return partuuid
+    return _partuuid
 
 
 @click.group(no_args_is_help=True, cls=AHGroup)
@@ -261,7 +257,6 @@ def backup_byte_range(
     dict_output: bool,
     verbose: bool | int | float = False,
 ):
-
     device = Path(device)
     with open(device, "rb") as dfh:
         bytes_to_read = end - start
@@ -318,7 +313,6 @@ def compare_byte_range(
     dict_output: bool,
     verbose: bool | int | float = False,
 ):
-
     device = Path(device)
     if not start:
         start = int(backup_file.split("start_")[1].split("_")[0])
@@ -368,7 +362,6 @@ def write_gpt(
     dict_output: bool,
     verbose: bool | int | float = False,
 ):
-
     device = Path(device)
     eprint("writing GPT to:", device)
 
@@ -671,7 +664,6 @@ def create_filesystem(
     dict_output: bool,
     verbose: bool | int | float = False,
 ):
-
     device = Path(device)
     eprint("creating", filesystem, "filesystem on:", device)
     if not raw_device:
@@ -732,7 +724,6 @@ def destroy_block_device(
     dict_output: bool,
     verbose: bool | int | float = False,
 ):
-
     device = Path(device)
     assert isinstance(force, bool)
     # assert source in ['urandom', 'zero']
@@ -1093,7 +1084,6 @@ def destroy_block_devices_head_and_tail(
     dict_output: bool,
     verbose: bool | int | float = False,
 ):
-
     assert isinstance(devices, list) or isinstance(devices, tuple)
     for device in devices:
         device = Path(device)
@@ -1141,7 +1131,7 @@ def partuuid(
     dict_output: bool,
     verbose: bool | int | float = False,
 ):
-
+    assert isinstance(partition, Path)
     partuuid = get_partuuid_for_partition(
         partition=partition,
         verbose=verbose,
