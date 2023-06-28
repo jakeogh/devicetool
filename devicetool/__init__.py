@@ -1,5 +1,5 @@
 from .devicetool import add_partition_number_to_device
-from .devicetool import create_filesystem
+#from .devicetool import create_filesystem
 from .devicetool import destroy_block_device
 from .devicetool import destroy_block_device_head_and_tail
 from .devicetool import destroy_block_devices_head_and_tail

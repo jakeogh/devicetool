@@ -36,8 +36,13 @@ from pathtool import path_is_block_special
 from run_command import run_command
 from timetool import get_timestamp
 from warntool import warn
+
+from devicetool import add_partition_number_to_device
 from devicetool import device_is_not_a_partition
-from devicetool import wait_for_block_special_device_to_exist, add_partition_number_to_device, get_block_device_size, write_output, get_partuuid_for_partition
+from devicetool import get_block_device_size
+from devicetool import get_partuuid_for_partition
+from devicetool import wait_for_block_special_device_to_exist
+from devicetool import write_output
 
 
 @click.group(no_args_is_help=True, cls=AHGroup)
