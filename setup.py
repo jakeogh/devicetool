@@ -25,7 +25,7 @@ config = {
     "install_requires": dependencies,
     "entry_points": {
         "console_scripts": [
-            "devicetool=devicetool.devicetool:cli",
+            "devicetool=devicetool.cli:cli",
         ],
     },
 }

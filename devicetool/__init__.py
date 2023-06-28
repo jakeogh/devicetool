@@ -11,3 +11,5 @@ from .devicetool import safety_check_devices
 from .devicetool import write_efi_partition
 from .devicetool import write_gpt
 from .devicetool import write_grub_bios_partition
+from .devicetool import wait_for_block_special_device_to_exist
+from .devicetool import write_output
