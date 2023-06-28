@@ -1,10 +1,10 @@
-from .cli import create_filesystem
-from .cli import destroy_block_device
-from .cli import destroy_block_device_head_and_tail
-from .cli import destroy_block_devices_head_and_tail
-from .cli import write_efi_partition
-from .cli import write_gpt
-from .cli import write_grub_bios_partition
+# from .cli import create_filesystem
+# from .cli import destroy_block_device
+# from .cli import destroy_block_device_head_and_tail
+# from .cli import destroy_block_devices_head_and_tail
+# from .cli import write_efi_partition
+# from .cli import write_gpt
+# from .cli import write_grub_bios_partition
 from .devicetool import add_partition_number_to_device
 from .devicetool import device_is_not_a_partition
 from .devicetool import get_block_device_size
