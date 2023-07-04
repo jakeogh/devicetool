@@ -6,6 +6,7 @@
 # from .cli import write_gpt
 # from .cli import write_grub_bios_partition
 from .devicetool import add_partition_number_to_device
+from .devicetool import block_devices
 from .devicetool import device_is_not_a_partition
 from .devicetool import get_block_device_size
 from .devicetool import get_partuuid_for_partition
