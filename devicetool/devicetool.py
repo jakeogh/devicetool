@@ -38,6 +38,12 @@ def write_output(buf):
     sys.stderr.write(buf)
 
 
+def block_devices():
+    _devices = sh.lsblk("-d", "-n", "-p", "-o", "NAME").strip().split("\n")
+    devices = set([Path(os.fsdecode(_)).resolve() for _ in _devices])
+    return devices
+
+
 def get_block_device_size(
     device: Path,
     verbose: bool | int | float = False,
@@ -212,5 +218,3 @@ def get_partuuid_for_partition(
         ic(_partuuid)
 
     return _partuuid
-
-
