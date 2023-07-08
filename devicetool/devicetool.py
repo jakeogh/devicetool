@@ -64,18 +64,17 @@ def safety_check_devices(
     root_device_partition_table: str,
     root_filesystem: str,
     force: bool,
+    disk_size: None | str,
     verbose: bool | int | float = False,
 ):
     if boot_device:
         assert device_is_not_a_partition(
             device=boot_device,
-            verbose=verbose,
         )
 
     for device in root_devices:
         assert device_is_not_a_partition(
             device=device,
-            verbose=verbose,
         )
 
     if boot_device:
@@ -85,7 +84,6 @@ def safety_check_devices(
         assert path_is_block_special(boot_device)
         assert not block_special_path_is_mounted(
             boot_device,
-            verbose=verbose,
         )
 
     if root_devices:
@@ -99,7 +97,6 @@ def safety_check_devices(
             assert path_is_block_special(device)
             assert not block_special_path_is_mounted(
                 device,
-                verbose=verbose,
             )
 
     for device in root_devices:
@@ -109,35 +106,29 @@ def safety_check_devices(
             "get_block_device_size(boot_device):",
             get_block_device_size(
                 boot_device,
-                verbose=verbose,
             ),
         )
         eprint(
             "get_block_device_size(device):     ",
             get_block_device_size(
                 device,
-                verbose=verbose,
             ),
         )
         assert get_block_device_size(
             boot_device,
-            verbose=verbose,
         ) <= get_block_device_size(
             device,
-            verbose=verbose,
         )
 
     if root_devices:
         first_root_device_size = get_block_device_size(
             root_devices[0],
-            verbose=verbose,
         )
 
         for device in root_devices:
             assert (
                 get_block_device_size(
                     device,
-                    verbose=verbose,
                 )
                 == first_root_device_size
             )
@@ -146,11 +137,11 @@ def safety_check_devices(
         if not force:
             warn(
                 (boot_device,),
-                verbose=verbose,
+                disk_size=disk_size,
             )
             warn(
                 root_devices,
-                verbose=verbose,
+                disk_size=disk_size,
             )
 
 
@@ -210,11 +201,9 @@ def get_partuuid_for_partition(
 ):
     assert isinstance(partition, Path)
     blkid_command = sh.blkid(partition.as_posix())
-    if verbose:
-        ic(blkid_command)
+    ic(blkid_command)
 
     _partuuid = blkid_command.split("PARTUUID=")[-1:][0].split('"')[1]
-    if verbose:
-        ic(_partuuid)
+    ic(_partuuid)
 
     return _partuuid
