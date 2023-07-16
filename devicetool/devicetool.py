@@ -209,6 +209,6 @@ def get_partuuid_for_partition(
     return _partuuid
 
 
-def get_root_device():
+def get_root_device() -> Path:
     _result = sh.grub_probe("--target=device", "/")
-    return _result
+    return Path(_result)
