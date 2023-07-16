@@ -961,3 +961,17 @@ def partuuid(
         verbose=verbose,
     )
     print(partuuid)
+
+@cli.command("get-root-device")
+@click_add_options(click_global_options)
+@click.pass_context
+def _get_root_device(
+    ctx,
+    *,
+    verbose_inf: bool,
+    dict_output: bool,
+    verbose: bool | int | float = False,
+):
+
+    result = get_root_device()
+    print(result)

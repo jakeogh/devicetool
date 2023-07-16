@@ -207,3 +207,8 @@ def get_partuuid_for_partition(
     ic(_partuuid)
 
     return _partuuid
+
+
+def get_root_device():
+    _result = sh.grub_probe("--target=device", "/")
+    return _result

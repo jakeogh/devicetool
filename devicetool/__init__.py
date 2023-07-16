@@ -10,6 +10,7 @@ from .devicetool import block_devices
 from .devicetool import device_is_not_a_partition
 from .devicetool import get_block_device_size
 from .devicetool import get_partuuid_for_partition
+from .devicetool import get_root_device
 from .devicetool import path_is_block_special
 from .devicetool import safety_check_devices
 from .devicetool import wait_for_block_special_device_to_exist
