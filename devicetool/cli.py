@@ -41,6 +41,7 @@ from devicetool import add_partition_number_to_device
 from devicetool import device_is_not_a_partition
 from devicetool import get_block_device_size
 from devicetool import get_partuuid_for_partition
+from devicetool import get_root_device
 from devicetool import wait_for_block_special_device_to_exist
 from devicetool import write_output
 
@@ -962,6 +963,7 @@ def partuuid(
     )
     print(partuuid)
 
+
 @cli.command("get-root-device")
 @click_add_options(click_global_options)
 @click.pass_context
@@ -972,6 +974,5 @@ def _get_root_device(
     dict_output: bool,
     verbose: bool | int | float = False,
 ):
-
     result = get_root_device()
     print(result)
