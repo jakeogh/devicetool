@@ -957,11 +957,10 @@ def partuuid(
     verbose: bool | int | float = False,
 ):
     assert isinstance(partition, Path)
-    partuuid = get_partuuid_for_partition(
+    _partuuid = get_partuuid_for_partition(
         partition=partition,
-        verbose=verbose,
     )
-    print(partuuid)
+    print(_partuuid)
 
 
 @cli.command("get-root-device")
