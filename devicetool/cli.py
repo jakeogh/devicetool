@@ -31,6 +31,7 @@ from click_auto_help import AHGroup
 from clicktool import click_add_options
 from clicktool import click_global_options
 from clicktool import tv
+from devicefilesystemtool import write as create_filesystem
 from eprint import eprint
 from globalverbose import gvd
 from mounttool import block_special_path_is_mounted
@@ -264,6 +265,7 @@ def compare_byte_range(
 #    # run_command("sgdisk --clear " + device) #alt way to greate gpt label
 
 
+# this was replaced by devicelabeltool
 @cli.command()
 @click.option(
     "--device",
@@ -531,79 +533,82 @@ def write_grub_bios_partition(
 # sgdisk -a1 -n2:48:2047 -t2:EF02 -c2:"BIOS boot partition " + device # numbers in 512B sectors
 
 
-@cli.command()
-@click.argument(
-    "device", required=True, nargs=1, type=click.Path(exists=True, path_type=Path)
-)
-@click.option(
-    "--filesystem",
-    "filesystem",
-    is_flag=False,
-    required=True,
-    type=click.Choice(["fat16", "fat32", "ext4"]),
-)
-@click.option("--force", is_flag=True, required=False)
-@click.option("--raw-device", is_flag=True, required=False)
-@click_add_options(click_global_options)
-@click.pass_context
-def create_filesystem(
-    ctx,
-    *,
-    device: Path,
-    filesystem: str,
-    force: bool,
-    raw_device: bool,
-    verbose_inf: bool,
-    dict_output: bool,
-    verbose: bool | int | float = False,
-):
-    tty, verbose = tv(
-        ctx=ctx,
-        verbose=verbose,
-        verbose_inf=verbose_inf,
-    )
-
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
-    device = Path(device)
-    eprint("creating", filesystem, "filesystem on:", device)
-    if not raw_device:
-        assert device.as_posix()[-1].isdigit()
-    # oddly, this failed on '/dev/sda2', maybe the kernel was not done
-    # digesting the previous table change? (using fat16)
-    wait_for_block_special_device_to_exist(device=device)
-    assert path_is_block_special(device)
-    assert not block_special_path_is_mounted(
-        device,
-    )
-
-    if not force:
-        warn(
-            (device,),
-        )
-
-    if filesystem == "fat16":
-        run_command(
-            "mkfs.fat -F16 -s2 " + device.as_posix(),
-            verbose=True,
-        )
-    elif filesystem == "fat32":
-        run_command(
-            "mkfs.fat -F32 -s2 " + device.as_posix(),
-            verbose=True,
-        )
-    elif filesystem == "ext4":
-        run_command(
-            "mkfs.ext4 " + device.as_posix(),
-            verbose=True,
-        )
-    else:
-        assert False
+# this was moved to devicefilesystemtool
+# @cli.command()
+# @click.argument(
+#    "device", required=True, nargs=1, type=click.Path(exists=True, path_type=Path)
+# )
+# @click.option(
+#    "--filesystem",
+#    "filesystem",
+#    is_flag=False,
+#    required=True,
+#    type=click.Choice(["fat16", "fat32", "ext4"]),
+# )
+# @click.option("--force", is_flag=True, required=False)
+# @click.option("--raw-device", is_flag=True, required=False)
+# @click_add_options(click_global_options)
+# @click.pass_context
+# def create_filesystem(
+#    ctx,
+#    *,
+#    device: Path,
+#    filesystem: str,
+#    force: bool,
+#    raw_device: bool,
+#    verbose_inf: bool,
+#    dict_output: bool,
+#    verbose: bool | int | float = False,
+# ):
+#    tty, verbose = tv(
+#        ctx=ctx,
+#        verbose=verbose,
+#        verbose_inf=verbose_inf,
+#    )
+#
+#    if not verbose:
+#        ic.disable()
+#    else:
+#        ic.enable()
+#
+#    if verbose_inf:
+#        gvd.enable()
+#    device = Path(device)
+#    eprint("creating", filesystem, "filesystem on:", device)
+#    if not raw_device:
+#        assert device.as_posix()[-1].isdigit()
+#    # oddly, this failed on '/dev/sda2', maybe the kernel was not done
+#    # digesting the previous table change? (using fat16)
+#
+#    # this should be done by the caller
+#    wait_for_block_special_device_to_exist(device=device)
+#    assert path_is_block_special(device)
+#    assert not block_special_path_is_mounted(
+#        device,
+#    )
+#
+#    if not force:
+#        warn(
+#            (device,),
+#        )
+#
+#    if filesystem == "fat16":
+#        run_command(
+#            "mkfs.fat -F16 -s2 " + device.as_posix(),
+#            verbose=True,
+#        )
+#    elif filesystem == "fat32":
+#        run_command(
+#            "mkfs.fat -F32 -s2 " + device.as_posix(),
+#            verbose=True,
+#        )
+#    elif filesystem == "ext4":
+#        run_command(
+#            "mkfs.ext4 " + device.as_posix(),
+#            verbose=True,
+#        )
+#    else:
+#        assert False
 
 
 @cli.command()
