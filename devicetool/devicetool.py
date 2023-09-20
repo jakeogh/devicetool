@@ -46,7 +46,7 @@ def block_devices():
 
 def get_block_device_size(
     device: Path,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     assert Path(device).is_block_device()
     fd = os.open(device, os.O_RDONLY)
@@ -65,7 +65,7 @@ def safety_check_devices(
     root_filesystem: str,
     force: bool,
     disk_size: None | str,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     if boot_device:
         assert device_is_not_a_partition(
@@ -148,7 +148,7 @@ def safety_check_devices(
 def device_is_not_a_partition(
     *,
     device: Path,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     device = Path(device)
     if not (device.name.startswith("nvme") or device.name.startswith("mmcblk")):
@@ -158,34 +158,35 @@ def device_is_not_a_partition(
     return True
 
 
-def wait_for_block_special_device_to_exist(
-    *,
-    device: Path,
-    timeout: int = 5,
-):
-    device = Path(device)
-    eprint(f"waiting for block special device: {device.as_posix()} to exist")
-    start = time.time()
-    if path_exists(device):
-        assert path_is_block_special(device)
-        return True
-
-    while not path_exists(device):
-        time.sleep(0.1)
-        if time.time() - start > timeout:
-            raise TimeoutError(
-                f"timeout waiting for block special device: {device} to exist"
-            )
-        if path_is_block_special(device):
-            break
-    return True
+# pathtool
+# def wait_for_block_special_device_to_exist(
+#    *,
+#    device: Path,
+#    timeout: int = 5,
+# ):
+#    device = Path(device)
+#    eprint(f"waiting for block special device: {device.as_posix()} to exist")
+#    start = time.time()
+#    if path_exists(device):
+#        assert path_is_block_special(device)
+#        return True
+#
+#    while not path_exists(device):
+#        time.sleep(0.1)
+#        if time.time() - start > timeout:
+#            raise TimeoutError(
+#                f"timeout waiting for block special device: {device} to exist"
+#            )
+#        if path_is_block_special(device):
+#            break
+#    return True
 
 
 def add_partition_number_to_device(
     *,
     device: Path,
     partition_number: int,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     device = Path(device)
     if device.name.startswith("nvme") or device.name.startswith("mmcblk"):
@@ -197,7 +198,7 @@ def add_partition_number_to_device(
 
 def get_partuuid_for_partition(
     partition: Path,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     assert isinstance(partition, Path)
     blkid_command = sh.blkid(partition.as_posix())
