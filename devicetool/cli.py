@@ -36,6 +36,7 @@ from eprint import eprint
 from globalverbose import gvd
 from mounttool import block_special_path_is_mounted
 from pathtool import path_is_block_special
+from pathtool import wait_for_block_special_device_to_exist
 from run_command import run_command
 from timestamptool import get_timestamp
 from warntool import warn
@@ -45,7 +46,6 @@ from devicetool import device_is_not_a_partition
 from devicetool import get_block_device_size
 from devicetool import get_partuuid_for_partition
 from devicetool import get_root_device
-from devicetool import wait_for_block_special_device_to_exist
 from devicetool import write_output
 
 
