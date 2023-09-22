@@ -37,7 +37,7 @@ from globalverbose import gvd
 from mounttool import block_special_path_is_mounted
 from pathtool import path_is_block_special
 from run_command import run_command
-from timetool import get_timestamp
+from timestamptool import get_timestamp
 from warntool import warn
 
 from devicetool import add_partition_number_to_device
@@ -56,7 +56,7 @@ def cli(
     ctx,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -91,7 +91,7 @@ def backup_byte_range(
     note: str,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -161,7 +161,7 @@ def compare_byte_range(
     end: int,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -222,7 +222,7 @@ def compare_byte_range(
 #    no_backup: bool,
 #    verbose_inf: bool,
 #    dict_output: bool,
-#    verbose: bool | int | float = False,
+#    verbose: bool = False,
 # ):
 #    tty, verbose = tv(
 #        ctx=ctx,
@@ -287,7 +287,7 @@ def write_mbr(
     no_backup: bool,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -355,7 +355,7 @@ def write_efi_partition(
     force: bool,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -453,7 +453,7 @@ def write_grub_bios_partition(
     partition_number: int,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -558,7 +558,7 @@ def write_grub_bios_partition(
 #    raw_device: bool,
 #    verbose_inf: bool,
 #    dict_output: bool,
-#    verbose: bool | int | float = False,
+#    verbose: bool = False,
 # ):
 #    tty, verbose = tv(
 #        ctx=ctx,
@@ -631,7 +631,7 @@ def destroy_block_device(
     ask: bool,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -755,7 +755,7 @@ def destroy_block_device_head(
     note: str,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -811,7 +811,7 @@ def destroy_block_device_tail(
     note: str,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -899,7 +899,7 @@ def destroy_byte_range(
     note: str,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -965,7 +965,7 @@ def destroy_block_device_head_and_tail(
     no_backup: bool,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -1039,7 +1039,7 @@ def destroy_block_devices_head_and_tail(
     no_backup: bool,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -1095,7 +1095,7 @@ def partuuid(
     partition: Path,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
@@ -1125,7 +1125,7 @@ def _get_root_device(
     *,
     verbose_inf: bool,
     dict_output: bool,
-    verbose: bool | int | float = False,
+    verbose: bool = False,
 ):
     tty, verbose = tv(
         ctx=ctx,
