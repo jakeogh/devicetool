@@ -30,7 +30,7 @@ from asserttool import ic
 from click_auto_help import AHGroup
 from clicktool import click_add_options
 from clicktool import click_global_options
-from clicktool import tv
+from clicktool import tvicgvd
 from devicefilesystemtool import write as create_filesystem
 from eprint import eprint
 from globalverbose import gvd
@@ -58,19 +58,13 @@ def cli(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
-
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
 
 
 @cli.command()
@@ -93,19 +87,13 @@ def backup_byte_range(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
-
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
 
     device = Path(device)
     with open(device, "rb") as dfh:
@@ -163,19 +151,14 @@ def compare_byte_range(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
     device = Path(device)
     if not start:
         start = int(backup_file.split("start_")[1].split("_")[0])
@@ -289,19 +272,14 @@ def write_mbr(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
     device = Path(device)
     eprint("writing MBR to:", device)
     assert device_is_not_a_partition(
@@ -357,19 +335,14 @@ def write_efi_partition(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
     device = Path(device)
     ic("creating efi partition on:", device, partition_number, start, end)
     assert device_is_not_a_partition(
@@ -455,19 +428,14 @@ def write_grub_bios_partition(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
     device = Path(device)
     ic("creating grub_bios partition on:", device, partition_number, start, end)
     assert device_is_not_a_partition(
@@ -534,81 +502,7 @@ def write_grub_bios_partition(
 
 
 # this was moved to devicefilesystemtool
-# @cli.command()
-# @click.argument(
-#    "device", required=True, nargs=1, type=click.Path(exists=True, path_type=Path)
-# )
-# @click.option(
-#    "--filesystem",
-#    "filesystem",
-#    is_flag=False,
-#    required=True,
-#    type=click.Choice(["fat16", "fat32", "ext4"]),
-# )
-# @click.option("--force", is_flag=True, required=False)
-# @click.option("--raw-device", is_flag=True, required=False)
-# @click_add_options(click_global_options)
-# @click.pass_context
 # def create_filesystem(
-#    ctx,
-#    *,
-#    device: Path,
-#    filesystem: str,
-#    force: bool,
-#    raw_device: bool,
-#    verbose_inf: bool,
-#    dict_output: bool,
-#    verbose: bool = False,
-# ):
-#    tty, verbose = tv(
-#        ctx=ctx,
-#        verbose=verbose,
-#        verbose_inf=verbose_inf,
-#    )
-#
-#    if not verbose:
-#        ic.disable()
-#    else:
-#        ic.enable()
-#
-#    if verbose_inf:
-#        gvd.enable()
-#    device = Path(device)
-#    eprint("creating", filesystem, "filesystem on:", device)
-#    if not raw_device:
-#        assert device.as_posix()[-1].isdigit()
-#    # oddly, this failed on '/dev/sda2', maybe the kernel was not done
-#    # digesting the previous table change? (using fat16)
-#
-#    # this should be done by the caller
-#    wait_for_block_special_device_to_exist(device=device)
-#    assert path_is_block_special(device)
-#    assert not block_special_path_is_mounted(
-#        device,
-#    )
-#
-#    if not force:
-#        warn(
-#            (device,),
-#        )
-#
-#    if filesystem == "fat16":
-#        run_command(
-#            "mkfs.fat -F16 -s2 " + device.as_posix(),
-#            verbose=True,
-#        )
-#    elif filesystem == "fat32":
-#        run_command(
-#            "mkfs.fat -F32 -s2 " + device.as_posix(),
-#            verbose=True,
-#        )
-#    elif filesystem == "ext4":
-#        run_command(
-#            "mkfs.ext4 " + device.as_posix(),
-#            verbose=True,
-#        )
-#    else:
-#        assert False
 
 
 @cli.command()
@@ -633,19 +527,14 @@ def destroy_block_device(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
     device = Path(device)
     assert isinstance(force, bool)
     # assert source in ['urandom', 'zero']
@@ -757,19 +646,14 @@ def destroy_block_device_head(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
     device = Path(device)
     assert path_is_block_special(device)
     assert not block_special_path_is_mounted(
@@ -813,19 +697,14 @@ def destroy_block_device_tail(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
     device = Path(device)
     assert size > 0
     device_size = get_block_device_size(
@@ -901,19 +780,14 @@ def destroy_byte_range(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
     device = Path(device)
     assert start >= 0
     assert end > 0
@@ -967,19 +841,14 @@ def destroy_block_device_head_and_tail(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
     # run_command("sgdisk --zap-all " + device, verbose=True,) #alt method
     device = Path(device)
     # assert isinstance(device, str)
@@ -1041,19 +910,14 @@ def destroy_block_devices_head_and_tail(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
     assert isinstance(devices, list) or isinstance(devices, tuple)
     for device in devices:
         device = Path(device)
@@ -1097,19 +961,14 @@ def partuuid(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
 
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
     assert isinstance(partition, Path)
     _partuuid = get_partuuid_for_partition(
         partition=partition,
@@ -1127,19 +986,13 @@ def _get_root_device(
     dict_output: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
-
-    if not verbose:
-        ic.disable()
-    else:
-        ic.enable()
-
-    if verbose_inf:
-        gvd.enable()
 
     result = get_root_device()
     print(result)
