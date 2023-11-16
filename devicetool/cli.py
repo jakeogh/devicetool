@@ -197,55 +197,6 @@ def compare_byte_range(
 # @click_add_options(click_global_options)
 # @click.pass_context
 # def write_gpt(
-#    ctx,
-#    *,
-#    device: Path,
-#    force: bool,
-#    no_wipe: bool,
-#    no_backup: bool,
-#    verbose_inf: bool,
-#    dict_output: bool,
-#    verbose: bool = False,
-# ):
-#    tty, verbose = tv(
-#        ctx=ctx,
-#        verbose=verbose,
-#        verbose_inf=verbose_inf,
-#    )
-#
-#    if not verbose:
-#        ic.disable()
-#    else:
-#        ic.enable()
-#
-#    if verbose_inf:
-#        gvd.enable()
-#    device = Path(device)
-#    eprint("writing GPT to:", device)
-#
-#    assert device_is_not_a_partition(
-#        device=device,
-#    )
-#
-#    assert path_is_block_special(device)
-#    assert not block_special_path_is_mounted(device)
-#    if not force:
-#        warn((device,))
-#    if not no_wipe:
-#        assert False  ## cant import below right now
-#        # ctx.invoke(destroy_block_device_head_and_tail,
-#        #           device=device,
-#        #           force=force,
-#        #           no_backup=no_backup,
-#        #           )
-#        ##run_command("sgdisk --zap-all " + boot_device)
-#    else:
-#        eprint("skipping wipe")
-#
-#    run_command(
-#        "parted " + device.as_posix() + " --script -- mklabel gpt", verbose=True
-#    )
-#    # run_command("sgdisk --clear " + device) #alt way to greate gpt label
 
 
 # this was replaced by devicelabeltool
