@@ -236,13 +236,14 @@ def write_mbr(
     assert device_is_not_a_partition(
         device=device,
     )
-    assert path_is_block_special(device)
+    assert path_is_block_special(device, symlink_ok=True)
     assert not block_special_path_is_mounted(
         device,
     )
     if not force:
         warn(
             (device,),
+            symlink_ok=True,
         )
     if not no_wipe:
         assert False  # fixme
@@ -300,7 +301,7 @@ def write_efi_partition(
         device=device,
     )
     # assert not device.endswith('/')  # Path() fixed that
-    assert path_is_block_special(device)
+    assert path_is_block_special(device, symlink_ok=True)
     assert not block_special_path_is_mounted(
         device,
     )
@@ -309,6 +310,7 @@ def write_efi_partition(
     if not force:
         warn(
             (device,),
+            symlink_ok=True,
         )
 
     # output = run_command("parted " + device + " --align optimal --script -- mkpart primary " + start + ' ' + end)
@@ -343,7 +345,7 @@ def write_efi_partition(
         partition_number=partition_number,
     )
     wait_for_block_special_device_to_exist(device=fat16_partition_device)
-    # while not path_is_block_special(fat16_partition_device):
+    # while not path_is_block_special(fat16_partition_device, symlink_ok=True):
     #    eprint("fat16_partition_device", fat16_partition_device, "is not block special yet, waiting a second.")
     #    time.sleep(1)
 
@@ -392,7 +394,7 @@ def write_grub_bios_partition(
     assert device_is_not_a_partition(
         device=device,
     )
-    assert path_is_block_special(device)
+    assert path_is_block_special(device, symlink_ok=True)
     assert not block_special_path_is_mounted(
         device,
     )
@@ -401,6 +403,7 @@ def write_grub_bios_partition(
     if not force:
         warn(
             (device,),
+            symlink_ok=True,
         )
 
     # run_command("parted " + device + " --align optimal --script -- mkpart primary " + str(start) + ' ' + str(end), verbose=True)
@@ -495,13 +498,14 @@ def destroy_block_device(
     )
     assert device.as_posix().startswith("/dev/")
     ic("destroying device:", device)
-    assert path_is_block_special(device)
+    assert path_is_block_special(device, symlink_ok=True)
     assert not block_special_path_is_mounted(
         device,
     )
     if not force:
         warn(
             (device,),
+            symlink_ok=True,
         )
     # device_name = device.split('/')[-1]
     assert len(device.name) >= 3
@@ -509,7 +513,7 @@ def destroy_block_device(
     assert device.as_posix().endswith(device.name)
     luks_mapper = Path("/dev/mapper") / Path(device.name)
     ic(luks_mapper)
-    assert not path_is_block_special(luks_mapper, follow_symlinks=True)
+    assert not path_is_block_special(luks_mapper, symlink_ok=True)
     assert not luks_mapper.exists()
 
     # zero out any partition or existing LUKS header... otherwise cryptsetup throws warning and asks for comfirmation
@@ -537,7 +541,7 @@ def destroy_block_device(
     )
     # sh.cryptsetup('open', '--type', 'plain', '-d', '/dev/urandom', device.as_posix(), device.name)
 
-    assert path_is_block_special(luks_mapper, follow_symlinks=True)
+    assert path_is_block_special(luks_mapper, symlink_ok=True)
     assert not block_special_path_is_mounted(
         luks_mapper,
     )
@@ -606,7 +610,7 @@ def destroy_block_device_head(
     )
 
     device = Path(device)
-    assert path_is_block_special(device)
+    assert path_is_block_special(device, symlink_ok=True)
     assert not block_special_path_is_mounted(
         device,
     )
@@ -807,11 +811,12 @@ def destroy_block_device_head_and_tail(
         device=device,
     )
     eprint("destroying device:", device)
-    assert path_is_block_special(device)
+    assert path_is_block_special(device, symlink_ok=True)
     assert not block_special_path_is_mounted(device)
     if not force:
         warn(
             (device,),
+            symlink_ok=True,
         )
     if not note:
         note = str(time.time()) + "_" + device.as_posix().replace("/", "_")
@@ -876,7 +881,7 @@ def destroy_block_devices_head_and_tail(
             device=device,
         )
         eprint("destroying device:", device)
-        assert path_is_block_special(device)
+        assert path_is_block_special(device, symlink_ok=True)
         assert not block_special_path_is_mounted(
             device,
         )
@@ -884,6 +889,7 @@ def destroy_block_devices_head_and_tail(
     if not force:
         warn(
             devices,
+            symlink_ok=True,
         )
 
     for device in devices:
