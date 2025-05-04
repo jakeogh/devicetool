@@ -46,7 +46,6 @@ def block_devices():
 
 def get_block_device_size(
     device: Path,
-    verbose: bool = False,
 ):
     assert Path(device).is_block_device()
     fd = os.open(device, os.O_RDONLY)
@@ -65,7 +64,6 @@ def safety_check_devices(
     root_filesystem: str,
     force: bool,
     disk_size: None | str,
-    verbose: bool = False,
 ):
     if boot_device:
         assert device_is_not_a_partition(
@@ -81,7 +79,7 @@ def safety_check_devices(
         eprint(
             f"installing gentoo on boot device: {boot_device} {boot_device_partition_table} {boot_filesystem}"
         )
-        assert path_is_block_special(boot_device)
+        assert path_is_block_special(boot_device, symlink_ok=True)
         assert not block_special_path_is_mounted(
             boot_device,
         )
@@ -94,7 +92,7 @@ def safety_check_devices(
             "(" + root_filesystem + ")",
         )
         for device in root_devices:
-            assert path_is_block_special(device)
+            assert path_is_block_special(device, symlink_ok=True)
             assert not block_special_path_is_mounted(
                 device,
             )
@@ -138,17 +136,18 @@ def safety_check_devices(
             warn(
                 (boot_device,),
                 disk_size=disk_size,
+                symlink_ok=True,
             )
             warn(
                 root_devices,
                 disk_size=disk_size,
+                symlink_ok=True,
             )
 
 
 def device_is_not_a_partition(
     *,
     device: Path,
-    verbose: bool = False,
 ):
     device = Path(device)
     if not (device.name.startswith("nvme") or device.name.startswith("mmcblk")):
@@ -168,7 +167,7 @@ def device_is_not_a_partition(
 #    eprint(f"waiting for block special device: {device.as_posix()} to exist")
 #    start = time.time()
 #    if path_exists(device):
-#        assert path_is_block_special(device)
+#        assert path_is_block_special(device, symlink_ok=True)
 #        return True
 #
 #    while not path_exists(device):
@@ -177,7 +176,7 @@ def device_is_not_a_partition(
 #            raise TimeoutError(
 #                f"timeout waiting for block special device: {device} to exist"
 #            )
-#        if path_is_block_special(device):
+#        if path_is_block_special(device, symlink_ok=True):
 #            break
 #    return True
 
@@ -186,7 +185,6 @@ def add_partition_number_to_device(
     *,
     device: Path,
     partition_number: int,
-    verbose: bool = False,
 ):
     device = Path(device)
     if device.name.startswith("nvme") or device.name.startswith("mmcblk"):
@@ -198,7 +196,6 @@ def add_partition_number_to_device(
 
 def get_partuuid_for_partition(
     partition: Path,
-    verbose: bool = False,
 ):
     assert isinstance(partition, Path)
     blkid_command = sh.blkid(partition.as_posix())
