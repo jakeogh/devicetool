@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import os
 import sys
-import time
 from pathlib import Path
 from typing import Tuple
 
@@ -29,7 +28,6 @@ import sh
 from asserttool import ic
 from eprint import eprint
 from mounttool import block_special_path_is_mounted
-from pathtool import path_exists
 from pathtool import path_is_block_special
 from warntool import warn
 
