@@ -1,23 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
-# pylint: disable=useless-suppression             # [I0021]
-# pylint: disable=missing-docstring               # [C0111] docstrings are always outdated and wrong
-# pylint: disable=fixme                           # [W0511] todo is encouraged
-# pylint: disable=line-too-long                   # [C0301]
-# pylint: disable=too-many-instance-attributes    # [R0902]
-# pylint: disable=too-many-lines                  # [C0302] too many lines in module
-# pylint: disable=invalid-name                    # [C0103] single letter var names, name too descriptive
-# pylint: disable=too-many-return-statements      # [R0911]
-# pylint: disable=too-many-branches               # [R0912]
-# pylint: disable=too-many-statements             # [R0915]
-# pylint: disable=too-many-arguments              # [R0913]
-# pylint: disable=too-many-nested-blocks          # [R1702]
-# pylint: disable=too-many-locals                 # [R0914]
-# pylint: disable=too-few-public-methods          # [R0903]
-# pylint: disable=no-member                       # [E1101] no member for base
-# pylint: disable=attribute-defined-outside-init  # [W0201]
-# pylint: disable=too-many-boolean-expressions    # [R0916] in if statement
 from __future__ import annotations
 
 import os
@@ -69,10 +52,23 @@ def cli(
 
 @cli.command()
 @click.argument(
-    "device", required=True, nargs=1, type=click.Path(exists=True, path_type=Path)
+    "device",
+    required=True,
+    nargs=1,
+    type=click.Path(exists=True, path_type=Path),
 )
-@click.option("--start", is_flag=False, required=True, type=int)
-@click.option("--end", is_flag=False, required=True, type=int)
+@click.option(
+    "--start",
+    is_flag=False,
+    required=True,
+    type=int,
+)
+@click.option(
+    "--end",
+    is_flag=False,
+    required=True,
+    type=int,
+)
 @click.option("--note", is_flag=False, type=str)
 @click_add_options(click_global_options)
 @click.pass_context
@@ -269,9 +265,24 @@ def write_mbr(
     required=True,
     type=click.Path(exists=True, path_type=Path),
 )
-@click.option("--start", is_flag=False, required=True, type=str)
-@click.option("--end", is_flag=False, required=True, type=str)
-@click.option("--partition-number", is_flag=False, required=True, type=int)
+@click.option(
+    "--start",
+    is_flag=False,
+    required=True,
+    type=str,
+)
+@click.option(
+    "--end",
+    is_flag=False,
+    required=True,
+    type=str,
+)
+@click.option(
+    "--partition-number",
+    is_flag=False,
+    required=True,
+    type=int,
+)
 @click.option("--force", is_flag=True, required=False)
 @click_add_options(click_global_options)
 @click.pass_context
@@ -296,7 +307,13 @@ def write_efi_partition(
     )
 
     device = Path(device)
-    ic("creating efi partition on:", device, partition_number, start, end)
+    ic(
+        "creating efi partition on:",
+        device,
+        partition_number,
+        start,
+        end,
+    )
     assert device_is_not_a_partition(
         device=device,
     )
@@ -350,7 +367,10 @@ def write_efi_partition(
     #    time.sleep(1)
 
     ctx.invoke(
-        create_filesystem, device=fat16_partition_device, filesystem="fat16", force=True
+        create_filesystem,
+        device=fat16_partition_device,
+        filesystem="fat16",
+        force=True,
     )
 
     # 127488 /mnt/sdb2/EFI/BOOT/BOOTX64.EFI
@@ -363,9 +383,24 @@ def write_efi_partition(
     required=True,
     type=click.Path(exists=True, path_type=Path),
 )
-@click.option("--start", is_flag=False, required=True, type=str)
-@click.option("--end", is_flag=False, required=True, type=str)
-@click.option("--partition_number", is_flag=False, required=True, type=int)
+@click.option(
+    "--start",
+    is_flag=False,
+    required=True,
+    type=str,
+)
+@click.option(
+    "--end",
+    is_flag=False,
+    required=True,
+    type=str,
+)
+@click.option(
+    "--partition_number",
+    is_flag=False,
+    required=True,
+    type=int,
+)
 @click.option("--force", is_flag=True, required=False)
 @click_add_options(click_global_options)
 @click.pass_context
@@ -390,7 +425,13 @@ def write_grub_bios_partition(
     )
 
     device = Path(device)
-    ic("creating grub_bios partition on:", device, partition_number, start, end)
+    ic(
+        "creating grub_bios partition on:",
+        device,
+        partition_number,
+        start,
+        end,
+    )
     assert device_is_not_a_partition(
         device=device,
     )
@@ -578,10 +619,23 @@ def destroy_block_device(
 
 
 @cli.command()
-@click.argument("device", required=True, nargs=1, type=str)
-@click.option("--size", is_flag=False, required=True, type=int)
+@click.argument(
+    "device",
+    required=True,
+    nargs=1,
+    type=str,
+)
 @click.option(
-    "--source", is_flag=False, required=True, type=click.Choice(["urandom", "zero"])
+    "--size",
+    is_flag=False,
+    required=True,
+    type=int,
+)
+@click.option(
+    "--source",
+    is_flag=False,
+    required=True,
+    type=click.Choice(["urandom", "zero"]),
 )
 @click.option("--no-backup", is_flag=True, required=False)
 @click.option("--note", is_flag=False, type=str)
@@ -628,11 +682,22 @@ def destroy_block_device_head(
 
 @cli.command()
 @click.argument(
-    "device", required=True, nargs=1, type=click.Path(exists=True, path_type=Path)
+    "device",
+    required=True,
+    nargs=1,
+    type=click.Path(exists=True, path_type=Path),
 )
-@click.option("--size", is_flag=False, required=True, type=int)
 @click.option(
-    "--source", is_flag=False, required=True, type=click.Choice(["urandom", "zero"])
+    "--size",
+    is_flag=False,
+    required=True,
+    type=int,
+)
+@click.option(
+    "--source",
+    is_flag=False,
+    required=True,
+    type=click.Choice(["urandom", "zero"]),
 )
 @click.option("--ask", is_flag=True, required=False)
 @click.option("--no-backup", is_flag=True, required=False)
@@ -770,11 +835,22 @@ def destroy_byte_range(
 
 @cli.command()
 @click.argument(
-    "device", required=True, nargs=1, type=click.Path(exists=True, path_type=Path)
+    "device",
+    required=True,
+    nargs=1,
+    type=click.Path(exists=True, path_type=Path),
 )
-@click.option("--size", is_flag=False, type=int, default=(2048))
 @click.option(
-    "--source", is_flag=False, required=True, type=click.Choice(["urandom", "zero"])
+    "--size",
+    is_flag=False,
+    type=int,
+    default=(2048),
+)
+@click.option(
+    "--source",
+    is_flag=False,
+    required=True,
+    type=click.Choice(["urandom", "zero"]),
 )
 @click.option("--note", is_flag=False, type=str)
 @click.option("--ask", is_flag=True, required=False)
@@ -844,9 +920,17 @@ def destroy_block_device_head_and_tail(
 
 @cli.command()
 @click.argument(
-    "devices", required=True, nargs=-1, type=click.Path(exists=True, path_type=Path)
+    "devices",
+    required=True,
+    nargs=-1,
+    type=click.Path(exists=True, path_type=Path),
 )
-@click.option("--size", is_flag=False, type=int, default=(1024 * 1024 * 128))
+@click.option(
+    "--size",
+    is_flag=False,
+    type=int,
+    default=(1024 * 1024 * 128),
+)
 @click.option("--note", is_flag=False, type=str)
 @click.option("--force", is_flag=True, required=False)
 @click.option("--ask", is_flag=True, required=False)
@@ -906,7 +990,10 @@ def destroy_block_devices_head_and_tail(
 
 @cli.command("partuuid")
 @click.argument(
-    "partition", required=True, nargs=1, type=click.Path(exists=True, path_type=Path)
+    "partition",
+    required=True,
+    nargs=1,
+    type=click.Path(exists=True, path_type=Path),
 )
 @click_add_options(click_global_options)
 @click.pass_context
