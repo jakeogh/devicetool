@@ -496,7 +496,7 @@ def destroy_block_device(
         verbose=True,
     )
 
-    open_command = _cryptsetup.bake(
+    open_command = _cryptsetup.rebake(
         "open",
         "--type",
         "plain",
@@ -529,7 +529,7 @@ def destroy_block_device(
 
     time.sleep(1)  # so "cryptsetup close" doesnt throw an error
 
-    close_command = _cryptsetup.bake("close", device.name)
+    close_command = _cryptsetup.rebake("close", device.name)
     ic(close_command)
     if ask:
         _ask(close_command)
