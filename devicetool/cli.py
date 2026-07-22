@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf8 -*-
-
-from __future__ import annotations
 
 import os
+import sys
 import time
 from pathlib import Path
 
 import click
-import sh
+import hs
 from asserttool import ic
 from click_auto_help import AHGroup
 from clicktool import click_add_options
@@ -20,7 +18,6 @@ from globalverbose import gvd
 from mounttool import block_special_path_is_mounted
 from pathtool import path_is_block_special
 from pathtool import wait_for_block_special_device_to_exist
-from run_command import run_command
 from timestamptool import get_timestamp
 from warntool import warn
 
@@ -31,16 +28,26 @@ from devicetool import get_partuuid_for_partition
 from devicetool import get_root_device
 from devicetool import write_output
 
+_parted = hs.Command("parted")
+_cryptsetup = hs.Command("cryptsetup")
+
+
+def _ask(command) -> None:
+    eprint("Press ENTER to execute command:")
+    eprint(command)
+    if input():
+        sys.exit(1)
+
 
 @click.group(no_args_is_help=True, cls=AHGroup)
 @click_add_options(click_global_options)
 @click.pass_context
 def cli(
-    ctx,
+    ctx: click.Context,
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -73,7 +80,7 @@ def cli(
 @click_add_options(click_global_options)
 @click.pass_context
 def backup_byte_range(
-    ctx,
+    ctx: click.Context,
     *,
     device: Path,
     start: int,
@@ -82,7 +89,7 @@ def backup_byte_range(
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> str:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -103,25 +110,17 @@ def backup_byte_range(
     running_on_hostname = os.uname()[1]
     device_string = device.as_posix().replace("/", "_")
     backup_file_tail = (
-        "_."
-        + device_string
-        + "."
-        + time_stamp
-        + "."
-        + running_on_hostname
-        + "_start_"
-        + str(start)
-        + "_end_"
-        + str(end)
-        + ".bak"
+        f"_.{device_string}.{time_stamp}.{running_on_hostname}"
+        f"_start_{start}_end_{end}.bak"
     )
     if note:
-        backup_file = "_backup_" + note + backup_file_tail
+        backup_file = f"_backup_{note}{backup_file_tail}"
     else:
-        backup_file = "_backup__." + backup_file_tail
+        backup_file = f"_backup__.{backup_file_tail}"
     with open(backup_file, "xb") as bfh:
         bfh.write(bytes_read)
     print(backup_file)
+    return backup_file
 
 
 @cli.command()
@@ -137,16 +136,16 @@ def backup_byte_range(
 @click_add_options(click_global_options)
 @click.pass_context
 def compare_byte_range(
-    ctx,
+    ctx: click.Context,
     *,
     device: Path,
     backup_file: str,
-    start: int,
-    end: int,
+    start: None | int,
+    end: None | int,
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -160,13 +159,6 @@ def compare_byte_range(
         start = int(backup_file.split("start_")[1].split("_")[0])
     if not end:
         end = int(backup_file.split("end_")[1].split("_")[0].split(".")[0])
-    assert isinstance(start, int)
-    assert isinstance(end, int)
-    # current_copy = backup_byte_range(device=device,
-    #                                 start=start,
-    #                                 end=end,
-    #                                 note='current',
-    #                                 )
     current_copy = ctx.invoke(
         backup_byte_range,
         device=device,
@@ -174,28 +166,9 @@ def compare_byte_range(
         end=end,
         note="current",
     )
-    vbindiff_command = "vbindiff " + current_copy + " " + backup_file
-    eprint(vbindiff_command)
-    os.system(vbindiff_command)
+    hs.Command("vbindiff")(current_copy, backup_file, _fg=True)
 
 
-# this function has been replaced with calls to devicelabeltool
-# @cli.command()
-# @click.option(
-#    "--device",
-#    is_flag=False,
-#    required=True,
-#    type=click.Path(exists=True, path_type=Path),
-# )
-# @click.option("--force", is_flag=True, required=False)
-# @click.option("--no-wipe", is_flag=True, required=False)
-# @click.option("--no-backup", is_flag=True, required=False)
-# @click_add_options(click_global_options)
-# @click.pass_context
-# def write_gpt(
-
-
-# this was replaced by devicelabeltool
 @cli.command()
 @click.option(
     "--device",
@@ -209,7 +182,7 @@ def compare_byte_range(
 @click_add_options(click_global_options)
 @click.pass_context
 def write_mbr(
-    ctx,
+    ctx: click.Context,
     *,
     device: Path,
     force: bool,
@@ -218,7 +191,7 @@ def write_mbr(
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -229,33 +202,26 @@ def write_mbr(
 
     device = Path(device)
     eprint("writing MBR to:", device)
-    assert device_is_not_a_partition(
-        device=device,
-    )
+    assert device_is_not_a_partition(device=device)
     assert path_is_block_special(device, symlink_ok=True)
-    assert not block_special_path_is_mounted(
-        device,
-    )
+    assert not block_special_path_is_mounted(device)
     if not force:
         warn(
             (device,),
             symlink_ok=True,
         )
     if not no_wipe:
-        assert False  # fixme
-        # ctx.invoke(destroy_block_device_head_and_tail,
-        #           device=device,
-        #           force=force,
-        #           no_backup=no_backup,
-        #           )
-        ##run_command("sgdisk --zap-all " + boot_device)
+        raise NotImplementedError("wipe before mklabel")
 
-    run_command(
-        "parted " + device.as_posix() + " --script -- mklabel msdos",
-        verbose=True,
+    _parted(
+        device.as_posix(),
+        "--script",
+        "--",
+        "mklabel",
+        "msdos",
+        _out=sys.stdout,
+        _err=sys.stderr,
     )
-    # run_command("parted " + device + " --script -- mklabel gpt")
-    # run_command("sgdisk --clear " + device) #alt way to greate gpt label
 
 
 @cli.command()
@@ -287,17 +253,17 @@ def write_mbr(
 @click_add_options(click_global_options)
 @click.pass_context
 def write_efi_partition(
-    ctx,
+    ctx: click.Context,
     *,
     device: Path,
-    start: int,
-    end: int,
+    start: str,
+    end: str,
     partition_number: int,
     force: bool,
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -307,22 +273,11 @@ def write_efi_partition(
     )
 
     device = Path(device)
-    ic(
-        "creating efi partition on:",
-        device,
-        partition_number,
-        start,
-        end,
-    )
-    assert device_is_not_a_partition(
-        device=device,
-    )
-    # assert not device.endswith('/')  # Path() fixed that
+    ic("creating efi partition on:", device, partition_number, start, end)
+    assert device_is_not_a_partition(device=device)
     assert path_is_block_special(device, symlink_ok=True)
-    assert not block_special_path_is_mounted(
-        device,
-    )
-    assert int(partition_number)
+    assert not block_special_path_is_mounted(device)
+    assert partition_number
 
     if not force:
         warn(
@@ -330,31 +285,39 @@ def write_efi_partition(
             symlink_ok=True,
         )
 
-    # output = run_command("parted " + device + " --align optimal --script -- mkpart primary " + start + ' ' + end)
-    run_command(
-        "parted --align minimal "
-        + device.as_posix()
-        + " --script -- mkpart primary "
-        + str(start)
-        + " "
-        + str(end),
-        verbose=True,
+    _parted(
+        "--align",
+        "minimal",
+        device.as_posix(),
+        "--script",
+        "--",
+        "mkpart",
+        "primary",
+        start,
+        end,
+        _out=sys.stdout,
+        _err=sys.stderr,
     )
-    run_command(
-        "parted "
-        + device.as_posix()
-        + " --script -- name "
-        + str(partition_number)
-        + " EFI",
-        verbose=True,
+    _parted(
+        device.as_posix(),
+        "--script",
+        "--",
+        "name",
+        str(partition_number),
+        "EFI",
+        _out=sys.stdout,
+        _err=sys.stderr,
     )
-    run_command(
-        "parted "
-        + device.as_posix()
-        + " --script -- set "
-        + str(partition_number)
-        + " boot on",
-        verbose=True,
+    _parted(
+        device.as_posix(),
+        "--script",
+        "--",
+        "set",
+        str(partition_number),
+        "boot",
+        "on",
+        _out=sys.stdout,
+        _err=sys.stderr,
     )
 
     fat16_partition_device = add_partition_number_to_device(
@@ -362,9 +325,6 @@ def write_efi_partition(
         partition_number=partition_number,
     )
     wait_for_block_special_device_to_exist(device=fat16_partition_device)
-    # while not path_is_block_special(fat16_partition_device, symlink_ok=True):
-    #    eprint("fat16_partition_device", fat16_partition_device, "is not block special yet, waiting a second.")
-    #    time.sleep(1)
 
     ctx.invoke(
         create_filesystem,
@@ -372,8 +332,6 @@ def write_efi_partition(
         filesystem="fat16",
         force=True,
     )
-
-    # 127488 /mnt/sdb2/EFI/BOOT/BOOTX64.EFI
 
 
 @cli.command()
@@ -396,7 +354,7 @@ def write_efi_partition(
     type=str,
 )
 @click.option(
-    "--partition_number",
+    "--partition-number",
     is_flag=False,
     required=True,
     type=int,
@@ -405,17 +363,17 @@ def write_efi_partition(
 @click_add_options(click_global_options)
 @click.pass_context
 def write_grub_bios_partition(
-    ctx,
+    ctx: click.Context,
     *,
     device: Path,
-    start: int,
-    end: int,
-    force: int,
+    start: str,
+    end: str,
+    force: bool,
     partition_number: int,
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -425,21 +383,11 @@ def write_grub_bios_partition(
     )
 
     device = Path(device)
-    ic(
-        "creating grub_bios partition on:",
-        device,
-        partition_number,
-        start,
-        end,
-    )
-    assert device_is_not_a_partition(
-        device=device,
-    )
+    ic("creating grub_bios partition on:", device, partition_number, start, end)
+    assert device_is_not_a_partition(device=device)
     assert path_is_block_special(device, symlink_ok=True)
-    assert not block_special_path_is_mounted(
-        device,
-    )
-    assert int(partition_number)
+    assert not block_special_path_is_mounted(device)
+    assert partition_number
 
     if not force:
         warn(
@@ -447,57 +395,45 @@ def write_grub_bios_partition(
             symlink_ok=True,
         )
 
-    # run_command("parted " + device + " --align optimal --script -- mkpart primary " + str(start) + ' ' + str(end), verbose=True)
-    run_command(
-        "parted "
-        + device.as_posix()
-        + " --align minimal --script -- mkpart primary "
-        + str(start)
-        + " "
-        + str(end),
-        verbose=True,
+    _parted(
+        device.as_posix(),
+        "--align",
+        "minimal",
+        "--script",
+        "--",
+        "mkpart",
+        "primary",
+        start,
+        end,
+        _out=sys.stdout,
+        _err=sys.stderr,
     )
-    run_command(
-        "parted "
-        + device.as_posix()
-        + " --script -- name "
-        + str(partition_number)
-        + " BIOSGRUB",
-        verbose=True,
+    _parted(
+        device.as_posix(),
+        "--script",
+        "--",
+        "name",
+        str(partition_number),
+        "BIOSGRUB",
+        _out=sys.stdout,
+        _err=sys.stderr,
     )
-    run_command(
-        "parted "
-        + device.as_posix()
-        + " --script -- set "
-        + str(partition_number)
-        + " bios_grub on",
-        verbose=True,
+    _parted(
+        device.as_posix(),
+        "--script",
+        "--",
+        "set",
+        str(partition_number),
+        "bios_grub",
+        "on",
+        _out=sys.stdout,
+        _err=sys.stderr,
     )
     grub_bios_partition_device = add_partition_number_to_device(
         device=device,
         partition_number=partition_number,
     )
     wait_for_block_special_device_to_exist(device=grub_bios_partition_device)
-
-
-#    parted size prefixes
-#    "s" (sectors)
-#    "B" (bytes)
-#    "kB"
-#    "MB"
-#    "MiB"
-#    "GB"
-#    "GiB"
-#    "TB"
-#    "TiB"
-#    "%" (percentage of device size)
-#    "cyl" (cylinders)
-
-# sgdisk -a1 -n2:48:2047 -t2:EF02 -c2:"BIOS boot partition " + device # numbers in 512B sectors
-
-
-# this was moved to devicefilesystemtool
-# def create_filesystem(
 
 
 @cli.command()
@@ -513,7 +449,7 @@ def write_grub_bios_partition(
 @click_add_options(click_global_options)
 @click.pass_context
 def destroy_block_device(
-    ctx,
+    ctx: click.Context,
     *,
     device: Path,
     force: bool,
@@ -521,7 +457,7 @@ def destroy_block_device(
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -531,74 +467,59 @@ def destroy_block_device(
     )
 
     device = Path(device)
-    assert isinstance(force, bool)
-    # assert source in ['urandom', 'zero']
     assert not device.name.endswith("/")
-    assert device_is_not_a_partition(
-        device=device,
-    )
+    assert device_is_not_a_partition(device=device)
     assert device.as_posix().startswith("/dev/")
     ic("destroying device:", device)
     assert path_is_block_special(device, symlink_ok=True)
-    assert not block_special_path_is_mounted(
-        device,
-    )
+    assert not block_special_path_is_mounted(device)
     if not force:
         warn(
             (device,),
             symlink_ok=True,
         )
-    # device_name = device.split('/')[-1]
     assert len(device.name) >= 3
     assert "/" not in device.name
     assert device.as_posix().endswith(device.name)
-    luks_mapper = Path("/dev/mapper") / Path(device.name)
+    luks_mapper = Path("/dev/mapper") / device.name
     ic(luks_mapper)
     assert not path_is_block_special(luks_mapper, symlink_ok=True)
     assert not luks_mapper.exists()
 
-    # zero out any partition or existing LUKS header... otherwise cryptsetup throws warning and asks for comfirmation
-    # the LUKS signature "SKUL" is at bytes 16384-16387
+    # zero any existing partition or LUKS header (signature at bytes 16384-16387)
+    # otherwise cryptsetup warns and asks for confirmation
     ctx.invoke(
         destroy_block_device_head,
-        device=device.as_posix(),
+        device=device,
         source="zero",
         size=16387,
         verbose=True,
     )
 
-    luks_command = (
-        "cryptsetup open --type plain -d /dev/urandom "
-        + device.as_posix()
-        + " "
-        + device.name
+    open_command = _cryptsetup.bake(
+        "open",
+        "--type",
+        "plain",
+        "-d",
+        "/dev/urandom",
+        device.as_posix(),
+        device.name,
     )
-    ic(luks_command)
-    run_command(
-        luks_command,
-        expected_exit_status=0,
-        ask=ask,
-        verbose=True,
-    )
-    # sh.cryptsetup('open', '--type', 'plain', '-d', '/dev/urandom', device.as_posix(), device.name)
+    ic(open_command)
+    if ask:
+        _ask(open_command)
+    open_command()
 
     assert path_is_block_special(luks_mapper, symlink_ok=True)
-    assert not block_special_path_is_mounted(
-        luks_mapper,
-    )
-    sh.ls("-alh", luks_mapper)
+    assert not block_special_path_is_mounted(luks_mapper)
 
-    # sys-fs/dd-rescue
-    # --abort_we: makes dd_rescue abort on any write errors
-    # wipe_command = "dd_rescue --color=0 --abort_we /dev/zero " + luks_mapper.as_posix()
-    # ic(wipe_command)
-    # run_command(wipe_command, verbose=True, expected_exit_status=0, ask=ask,)
-    sh.dd_rescue(
+    # sys-fs/dd-rescue; --abort_we: abort on any write error; exit 21: device full
+    hs.Command("dd_rescue")(
         "--verbose",
         "--color=1",
         "--abort_we",
         "/dev/zero",
-        luks_mapper,
+        luks_mapper.as_posix(),
         _out=write_output,
         _err=write_output,
         _out_bufsize=1,
@@ -608,14 +529,11 @@ def destroy_block_device(
 
     time.sleep(1)  # so "cryptsetup close" doesnt throw an error
 
-    close_command = "cryptsetup close " + device.name
+    close_command = _cryptsetup.bake("close", device.name)
     ic(close_command)
-    run_command(
-        close_command,
-        expected_exit_status=0,
-        ask=ask,
-        verbose=True,
-    )
+    if ask:
+        _ask(close_command)
+    close_command()
 
 
 @cli.command()
@@ -623,7 +541,7 @@ def destroy_block_device(
     "device",
     required=True,
     nargs=1,
-    type=str,
+    type=click.Path(exists=True, path_type=Path),
 )
 @click.option(
     "--size",
@@ -643,7 +561,7 @@ def destroy_block_device(
 @click_add_options(click_global_options)
 @click.pass_context
 def destroy_block_device_head(
-    ctx,
+    ctx: click.Context,
     *,
     device: Path,
     size: int,
@@ -654,7 +572,7 @@ def destroy_block_device_head(
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -665,9 +583,7 @@ def destroy_block_device_head(
 
     device = Path(device)
     assert path_is_block_special(device, symlink_ok=True)
-    assert not block_special_path_is_mounted(
-        device,
-    )
+    assert not block_special_path_is_mounted(device)
     ic(device, size, source)
     ctx.invoke(
         destroy_byte_range,
@@ -705,18 +621,18 @@ def destroy_block_device_head(
 @click_add_options(click_global_options)
 @click.pass_context
 def destroy_block_device_tail(
-    ctx,
+    ctx: click.Context,
     *,
     device: Path,
     size: int,
-    source,
+    source: str,
     no_backup: bool,
     ask: bool,
     note: str,
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -727,9 +643,7 @@ def destroy_block_device_tail(
 
     device = Path(device)
     assert size > 0
-    device_size = get_block_device_size(
-        device=device,
-    )
+    device_size = get_block_device_size(device=device)
     assert size <= device_size
     start = device_size - size
     assert start > 0
@@ -787,7 +701,7 @@ def destroy_block_device_tail(
 @click_add_options(click_global_options)
 @click.pass_context
 def destroy_byte_range(
-    ctx,
+    ctx: click.Context,
     *,
     device: Path,
     start: int,
@@ -799,7 +713,7 @@ def destroy_byte_range(
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -827,10 +741,12 @@ def destroy_byte_range(
         dfh.seek(start)
         if source == "zero":
             dfh.write(bytearray(bytes_to_zero))
-        if source == "urandom":
+        elif source == "urandom":
             urandom_bytes = os.urandom(bytes_to_zero)
             assert len(urandom_bytes) == bytes_to_zero
             dfh.write(urandom_bytes)
+        else:
+            raise ValueError(f"unknown source: {source}")
 
 
 @cli.command()
@@ -844,7 +760,7 @@ def destroy_byte_range(
     "--size",
     is_flag=False,
     type=int,
-    default=(2048),
+    default=2048,
 )
 @click.option(
     "--source",
@@ -859,7 +775,7 @@ def destroy_byte_range(
 @click_add_options(click_global_options)
 @click.pass_context
 def destroy_block_device_head_and_tail(
-    ctx,
+    ctx: click.Context,
     *,
     device: Path,
     size: int,
@@ -871,7 +787,7 @@ def destroy_block_device_head_and_tail(
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -880,12 +796,8 @@ def destroy_block_device_head_and_tail(
         gvd=gvd,
     )
 
-    # run_command("sgdisk --zap-all " + device, verbose=True,) #alt method
     device = Path(device)
-    # assert isinstance(device, str)
-    assert device_is_not_a_partition(
-        device=device,
-    )
+    assert device_is_not_a_partition(device=device)
     eprint("destroying device:", device)
     assert path_is_block_special(device, symlink_ok=True)
     assert not block_special_path_is_mounted(device)
@@ -895,7 +807,7 @@ def destroy_block_device_head_and_tail(
             symlink_ok=True,
         )
     if not note:
-        note = str(time.time()) + "_" + device.as_posix().replace("/", "_")
+        note = f"{time.time()}_{device.as_posix().replace('/', '_')}"
         eprint("note:", note)
 
     ctx.invoke(
@@ -929,7 +841,7 @@ def destroy_block_device_head_and_tail(
     "--size",
     is_flag=False,
     type=int,
-    default=(1024 * 1024 * 128),
+    default=1024 * 1024 * 128,
 )
 @click.option("--note", is_flag=False, type=str)
 @click.option("--force", is_flag=True, required=False)
@@ -938,7 +850,7 @@ def destroy_block_device_head_and_tail(
 @click_add_options(click_global_options)
 @click.pass_context
 def destroy_block_devices_head_and_tail(
-    ctx,
+    ctx: click.Context,
     *,
     devices: tuple[Path, ...],
     size: int,
@@ -949,7 +861,7 @@ def destroy_block_devices_head_and_tail(
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -958,17 +870,13 @@ def destroy_block_devices_head_and_tail(
         gvd=gvd,
     )
 
-    assert isinstance(devices, list) or isinstance(devices, tuple)
+    assert isinstance(devices, tuple)
     for device in devices:
         device = Path(device)
-        assert device_is_not_a_partition(
-            device=device,
-        )
+        assert device_is_not_a_partition(device=device)
         eprint("destroying device:", device)
         assert path_is_block_special(device, symlink_ok=True)
-        assert not block_special_path_is_mounted(
-            device,
-        )
+        assert not block_special_path_is_mounted(device)
 
     if not force:
         warn(
@@ -998,13 +906,13 @@ def destroy_block_devices_head_and_tail(
 @click_add_options(click_global_options)
 @click.pass_context
 def partuuid(
-    ctx,
+    ctx: click.Context,
     *,
     partition: Path,
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -1013,23 +921,19 @@ def partuuid(
         gvd=gvd,
     )
 
-    assert isinstance(partition, Path)
-    _partuuid = get_partuuid_for_partition(
-        partition=partition,
-    )
-    print(_partuuid)
+    print(get_partuuid_for_partition(partition=partition))
 
 
 @cli.command("get-root-device")
 @click_add_options(click_global_options)
 @click.pass_context
 def _get_root_device(
-    ctx,
+    ctx: click.Context,
     *,
     verbose_inf: bool,
     dict_output: bool,
     verbose: bool = False,
-):
+) -> None:
     tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
@@ -1038,5 +942,4 @@ def _get_root_device(
         gvd=gvd,
     )
 
-    result = get_root_device()
-    print(result)
+    print(get_root_device())
