@@ -39,6 +39,7 @@ def safety_check_devices(
     root_filesystem: str,
     force: bool,
     disk_size: None | str,
+    full_disk: bool = False,
 ) -> None:
     if boot_device:
         assert device_is_not_a_partition(device=boot_device)
@@ -79,11 +80,13 @@ def safety_check_devices(
             warn(
                 (boot_device,),
                 disk_size=disk_size,
+                full_disk=full_disk,
                 symlink_ok=True,
             )
             warn(
                 root_devices,
                 disk_size=disk_size,
+                full_disk=full_disk,
                 symlink_ok=True,
             )
 
