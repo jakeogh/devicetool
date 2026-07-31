@@ -582,6 +582,9 @@ def destroy_block_device_head(
     )
 
     device = Path(device)
+    # click enforces required only when parsing a command line; ctx.invoke
+    # substitutes the option default, so an omitting caller arrives with None
+    assert source in ("zero", "urandom"), f"source must be zero or urandom, not {source!r}"
     assert path_is_block_special(device, symlink_ok=True)
     assert not block_special_path_is_mounted(device)
     ic(device, size, source)
@@ -642,6 +645,9 @@ def destroy_block_device_tail(
     )
 
     device = Path(device)
+    # click enforces required only when parsing a command line; ctx.invoke
+    # substitutes the option default, so an omitting caller arrives with None
+    assert source in ("zero", "urandom"), f"source must be zero or urandom, not {source!r}"
     assert size > 0
     device_size = get_block_device_size(device=device)
     assert size <= device_size
@@ -797,6 +803,9 @@ def destroy_block_device_head_and_tail(
     )
 
     device = Path(device)
+    # click enforces required only when parsing a command line; ctx.invoke
+    # substitutes the option default, so an omitting caller arrives with None
+    assert source in ("zero", "urandom"), f"source must be zero or urandom, not {source!r}"
     assert device_is_not_a_partition(device=device)
     eprint("destroying device:", device)
     assert path_is_block_special(device, symlink_ok=True)
